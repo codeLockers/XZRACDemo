@@ -12,6 +12,7 @@
 
 @interface ViewController ()
 @property (nonatomic, strong) UITextField *textField;
+@property (nonatomic, strong) RACSignal *signalA;
 @end
 
 @implementation ViewController
@@ -75,11 +76,11 @@
 //        
 //    }];
     
-//    [[RACSignal interval:1 onScheduler:[RACScheduler mainThreadScheduler]] subscribeNext:^(id x) {
-//       
-//        NSLog(@"%@",x);
-//        
-//    }];
+    [[RACSignal interval:15 onScheduler:[RACScheduler mainThreadScheduler]] subscribeNext:^(id x) {
+       
+        NSLog(@"%@",x);
+        
+    }];
     
     //*******Delegate************//
     
@@ -110,7 +111,7 @@
 //        NSLog(@"%@",x);
 //        
 //    }];
-    
+//    
     
     //************* 自定义信号 ***********//
 //    RACSignal *singal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
@@ -360,12 +361,12 @@
 //        
 //        return nil;
 //    }];
-//    
+//
 //    [[singalA merge:singalB] subscribeNext:^(id x) {
 //       
 //        NSLog(@"%@",x);
 //    }];
-//    
+//
 //    [[singalA concat:singalB] subscribeNext:^(id x) {
 //        
 //        NSLog(@"%@",x);
@@ -395,23 +396,23 @@
 //    }];
 
     
-    RACSignal *singal = [[RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-       
-        static int i = 0;
-        i++;
-        [subscriber sendNext:@(i)];
-        [subscriber sendCompleted];
-        
-        return nil;
-    }] replay];
-
-    [singal subscribeNext:^(id x) {
-        
-    }];
-    
-    [singal subscribeNext:^(id x) {
-        
-    }];
+//    RACSignal *singal = [[RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+//       
+//        static int i = 0;
+//        i++;
+//        [subscriber sendNext:@(i)];
+//        [subscriber sendCompleted];
+//        
+//        return nil;
+//    }] replay];
+//
+//    [singal subscribeNext:^(id x) {
+//        
+//    }];
+//    
+//    [singal subscribeNext:^(id x) {
+//        
+//    }];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -421,6 +422,45 @@
 - (IBAction)button_Pressed:(id)sender {
     
     self.textField.text = @"fdf";
+    
+    //************* 多信号 ***********//
+    self.signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        
+//        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)) ,dispatch_get_main_queue(),^{
+//            
+            [subscriber sendNext:@"a"];
+//            [subscriber sendCompleted];
+        
+//        });
+        [subscriber sendError:[NSError new]];
+        
+        return nil;
+    }];
+    
+    RACSignal *singalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        
+//        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)) ,dispatch_get_main_queue(),^{
+        
+            [subscriber sendNext:@"b"];
+            [subscriber sendCompleted];
+//        });
+        
+        return nil;
+    }];
+    
+
+    [[self.signalA concat:singalB] subscribeNext:^(id x) {
+
+        NSLog(@"%@",x);
+    }];
+
+    
+}
+- (IBAction)button2:(id)sender {
+    
+    [self.signalA subscribeNext:^(id x) {
+        NSLog(@"2");
+    }];
 }
 
 @end
